@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>CRM 3D – V4.00</title>
+    <title>CRM3D Print – V5.00</title>
     <style>html, body {
     height: 100%;
     margin: 0;
@@ -258,13 +258,59 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
 
 /* Wrapper barcode/QR */
 .label-codebar-wrapper {
-    display: flex; align-items: center; justify-content: flex-end; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; width: 100%;
+}
+.label-codebar-wrapper svg,
+.label-codebar-wrapper img {
+    width: 100% !important;
+    min-height: 50px !important;
+    height: auto !important;
+    display: block !important;
+}
+.label-codebar-wrapper canvas {
+    width: 60% !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto !important;
 }
 .label-codebar-wrapper svg {
     display: block;
-    max-width: 110px;
-    height: 30px;
+    max-width: 280px;
+    width: 280px;
+    height: 110px;
 }
+@media print {
+    .label-card {
+        width: 190mm !important;
+        min-height: 80mm !important;
+        border: 1px solid #9ca3af !important;
+        border-radius: 4px !important;
+        padding: 8mm 10mm !important;
+        font-size: 18px !important;
+        page-break-after: always !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+    }
+    .label-product-name { font-size: 22px !important; font-weight: 800 !important; }
+    .label-price { font-size: 24px !important; font-weight: 900 !important; color: #1d4ed8 !important; }
+    .label-codebar-wrapper {
+        justify-content: center !important;
+        width: 100% !important;
+        margin-top: 6mm !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .label-codebar-wrapper svg {
+        width: 170mm !important;
+        max-width: 170mm !important;
+        height: 80mm !important;
+        display: block !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
+
 .label-codebar-wrapper canvas,
 .label-codebar-wrapper img {
     display: block;
@@ -274,7 +320,7 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
 
 /* Agrandir codes pour formats larges */
 .label-card.size-avery-l7163 .label-codebar-wrapper svg,
-.label-card.size-100x150     .label-codebar-wrapper svg { max-width: 180px; height: 44px; }
+.label-card.size-100x150     .label-codebar-wrapper svg { max-width: 240px; width:240px; height: 90px; }
 .label-card.size-100x150 .label-codebar-wrapper canvas,
 .label-card.size-100x150 .label-codebar-wrapper img    { max-width: 90px; max-height: 90px; }
 
@@ -562,19 +608,12 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
 .badge-danger { background: rgba(239,68,68,0.15);  color: #f87171; }
 .badge-info   { background: rgba(59,130,246,0.15); color: #60a5fa; }
 
-/* ══ CORPORATE NAVY — GLOBIZ INDUSTRI ══ */
+/* ══ CORPORATE NAVY PRINT ══ */
 #print-area { display:none; font-family:'Segoe UI',Arial,sans-serif; }
-#print-area .gn-page { background:white; width:100%; }
-
-/* HEADER */
-#print-area .gn-header {
-    background:linear-gradient(135deg,#0a1628 0%,#1a3a6b 60%,#0d4a8a 100%);
-    padding:22px 28px; display:flex; justify-content:space-between; align-items:center;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
-}
+#print-area .gn-page { background:white; width:100%; display:flex; flex-direction:column; min-height:297mm; }
+#print-area .gn-header { background:linear-gradient(135deg,#0a1628 0%,#1a3a6b 60%,#0d4a8a 100%); padding:22px 28px; display:flex; justify-content:space-between; align-items:center; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 #print-area .gn-logo-zone { display:flex; align-items:center; gap:14px; }
-#print-area .gn-logo { max-height:60px; max-width:150px; width:auto; height:auto;
-    object-fit:contain; background:white; padding:4px; border-radius:8px; display:none; }
+#print-area .gn-logo { width:auto; height:auto; object-fit:contain; background:white; padding:4px; border-radius:8px; display:none; }
 #print-area .gn-co-name h1 { font-size:18px; font-weight:900; color:white; letter-spacing:2px; }
 #print-area .gn-co-name p  { font-size:9px; color:rgba(255,255,255,0.6); letter-spacing:1px; margin-top:2px; }
 #print-area .gn-co-coords  { font-size:9px; color:rgba(255,255,255,0.55); margin-top:5px; line-height:1.5; white-space:pre-wrap; }
@@ -582,121 +621,62 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
 #print-area .gn-doc-type   { font-size:26px; font-weight:900; color:white; letter-spacing:3px; }
 #print-area .gn-doc-num    { font-size:12px; color:rgba(255,255,255,0.8); margin-top:4px; }
 #print-area .gn-doc-date   { font-size:11px; color:#60a5fa; margin-top:2px; }
-
-/* BANDE ROUGE */
-#print-area .gn-red {
-    height:4px; background:linear-gradient(to right,#dc2626,#ef4444,#dc2626);
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
-}
-
-/* BLOCS INFO */
+#print-area .gn-red { height:4px; background:linear-gradient(to right,#dc2626,#ef4444,#dc2626); -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 #print-area .gn-info-row { display:grid; grid-template-columns:1fr 1fr; border-bottom:2px solid #e5e7eb; }
 #print-area .gn-info-box { padding:14px 22px; }
 #print-area .gn-info-box:first-child { border-right:1px solid #e5e7eb; }
-#print-area .gn-info-tag {
-    font-size:9px; font-weight:800; color:#1a3a6b; text-transform:uppercase;
-    letter-spacing:1.5px; background:#f0f4ff; padding:3px 8px;
-    border-left:3px solid #1a3a6b; margin-bottom:8px; display:inline-block;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
-}
+#print-area .gn-info-tag { font-size:9px; font-weight:800; color:#1a3a6b; text-transform:uppercase; letter-spacing:1.5px; background:#f0f4ff; padding:3px 8px; border-left:3px solid #1a3a6b; margin-bottom:8px; display:inline-block; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 #print-area .gn-info-val { font-size:12px; color:#1f2937; line-height:1.6; white-space:pre-wrap; }
 #print-area .gn-info-val strong { font-size:14px; font-weight:800; display:block; margin-bottom:2px; }
-
-/* TABLEAU */
 #print-area table.gn-table { width:100%; border-collapse:collapse; font-size:10px; }
-#print-area table.gn-table thead tr {
-    background:#1a3a6b; -webkit-print-color-adjust:exact; print-color-adjust:exact;
-}
-#print-area table.gn-table th {
-    padding:8px 6px; color:white; font-size:8px; font-weight:700;
-    text-transform:uppercase; letter-spacing:0.5px; text-align:center;
-    border-right:1px solid rgba(255,255,255,0.15);
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
-}
+#print-area table.gn-table thead tr { background:#1a3a6b; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+#print-area table.gn-table th { padding:8px 6px; color:white; font-size:8px; font-weight:700; text-transform:uppercase; text-align:center; border-right:1px solid rgba(255,255,255,0.15); -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 #print-area table.gn-table th:last-child { border-right:none; }
 #print-area table.gn-table th.gn-left { text-align:left; }
-#print-area table.gn-table td {
-    padding:9px 6px; text-align:center; vertical-align:middle;
-    border-bottom:1px solid #e5e7eb; border-right:1px solid #e5e7eb;
-    color:#374151; font-size:11px;
-}
+#print-area table.gn-table td { padding:9px 6px; text-align:center; vertical-align:middle; border-bottom:1px solid #e5e7eb; border-right:1px solid #e5e7eb; color:#374151; font-size:11px; background:white; }
 #print-area table.gn-table td:last-child { border-right:none; }
 #print-area table.gn-table td.gn-left { text-align:left; }
 #print-area table.gn-table td.gn-ttc  { font-weight:800; color:#1a3a6b; }
-#print-area table.gn-table tbody tr:nth-child(even) td {
-    background:#f8faff; -webkit-print-color-adjust:exact; print-color-adjust:exact;
-}
-/* Photo et Barcode contraints */
-#print-area .gn-photo-cell { width:46px; }
-#print-area .gn-photo-img  { width:36px; height:36px; object-fit:cover; border-radius:4px;
-    border:1px solid #bfdbfe; display:block; margin:0 auto; }
-#print-area .gn-photo-empty{ width:36px; height:36px; background:#eff6ff;
-    border:1px solid #bfdbfe; border-radius:4px; margin:0 auto; }
+#print-area table.gn-table tbody tr:nth-child(even) td { background:#f8faff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+#print-area .gn-photo-cell { width:60px; min-width:60px; }
+#print-area .gn-photo-img  { width:52px!important; height:52px!important; object-fit:cover; border-radius:4px; border:1px solid #bfdbfe; display:block; margin:0 auto; }
+#print-area .gn-photo-empty { width:52px; height:52px; background:#eff6ff; border:1.5px dashed #bfdbfe; border-radius:4px; margin:0 auto; }
 #print-area .gn-ref  { font-size:10px; font-weight:700; color:#1a3a6b; }
 #print-area .gn-dm   { font-size:11px; font-weight:700; }
 #print-area .gn-ds   { font-size:9px; color:#6b7280; margin-top:2px; }
-#print-area .gn-bc   { width:80px; }
-#print-area .gn-bc svg { display:block!important; width:76px!important; height:30px!important; margin:0 auto; }
-
-/* TOTAUX */
+#print-area .gn-bc   { width:220px; min-width:220px; }
+#print-area .gn-bc svg { display:block!important; width:216px!important; height:80px!important; margin:0 auto; }
 #print-area .gn-totals { display:flex; justify-content:flex-end; padding:14px 22px; border-bottom:1px solid #e5e7eb; }
 #print-area .gn-totals-box { width:260px; }
-#print-area .gn-total-line { display:flex; justify-content:space-between; padding:4px 0;
-    font-size:12px; color:#374151; border-bottom:1px dashed #e5e7eb; }
+#print-area .gn-total-line { display:flex; justify-content:space-between; padding:4px 0; font-size:12px; color:#374151; border-bottom:1px dashed #e5e7eb; }
 #print-area .gn-total-line.gn-muted { color:#6b7280; }
-#print-area .gn-total-main {
-    display:flex; justify-content:space-between;
-    background:#1a3a6b; color:white; padding:8px 10px; margin-top:4px;
-    border-radius:4px; font-size:14px; font-weight:800; border:none;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
-}
-
-/* QR PAIEMENT */
-#print-area .gn-pay-row {
-    display:flex; align-items:center; gap:16px; padding:12px 22px;
-    background:#f8faff; border-bottom:1px solid #e5e7eb;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
-}
-#print-area #print-qr-code canvas,
-#print-area #print-qr-code img { width:56px!important; height:56px!important; display:block; border:1px solid #d1d5db; border-radius:4px; padding:3px; background:white; }
+#print-area .gn-total-main { display:flex; justify-content:space-between; background:#1a3a6b; color:white; padding:8px 10px; margin-top:4px; border-radius:4px; font-size:14px; font-weight:800; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+#print-area .gn-pay-row { display:flex; align-items:center; gap:16px; padding:12px 22px; background:#f8faff; border-bottom:1px solid #e5e7eb; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+#print-area #print-qr-code img { width:56px!important; height:56px!important; display:block!important; border:1px solid #d1d5db; border-radius:4px; padding:3px; background:white; }
 #print-area .gn-pay-info h4 { font-size:11px; font-weight:800; color:#1a3a6b; margin-bottom:3px; }
 #print-area .gn-pay-info p  { font-size:10px; color:#6b7280; }
 #print-area .gn-pay-link    { font-size:10px; color:#2563eb; font-family:monospace; font-weight:700; }
-
-/* CONDITIONS + SIGNATURE */
-#print-area .gn-cond-row { display:grid; grid-template-columns:1fr 1fr; gap:0; padding:14px 22px; border-bottom:1px solid #e5e7eb; }
+#print-area .gn-cond-row { display:grid; grid-template-columns:1fr 1fr; padding:14px 22px; border-bottom:1px solid #e5e7eb; }
 #print-area .gn-cond-box h4 { font-size:9px; font-weight:800; color:#1a3a6b; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
 #print-area .gn-cond-box p  { font-size:9px; color:#6b7280; line-height:1.6; }
 #print-area .gn-sign-box    { border:1px solid #d1d5db; border-radius:4px; min-height:60px; padding:6px; margin-top:5px; }
-
-/* FOOTER */
-#print-area .gn-footer {
-    background:linear-gradient(135deg,#0a1628 0%,#1a3a6b 100%);
-    padding:11px 22px; display:flex; justify-content:space-between; align-items:center;
-    -webkit-print-color-adjust:exact; print-color-adjust:exact;
-}
+#print-area .gn-footer { background:linear-gradient(135deg,#0a1628 0%,#1a3a6b 100%); padding:11px 22px; display:flex; justify-content:space-between; align-items:center; margin-top:auto; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 #print-area .gn-footer-legal { font-size:8px; color:rgba(255,255,255,0.55); line-height:1.6; }
 #print-area .gn-footer-brand { font-size:9px; font-weight:800; color:rgba(255,255,255,0.35); letter-spacing:2px; }
-
-/* ── PRINT MEDIA ── */
+/* Overlay */
+#print-area { position:fixed; top:0; left:0; right:0; bottom:0; z-index:10000; overflow-y:auto; background:#dde3ea; padding:70px 20px 20px; }
+#print-area .gn-page { max-width:794px; margin:0 auto; box-shadow:0 8px 40px rgba(0,0,0,0.2); }
+#print-toolbar { display:none; position:fixed; top:0; left:0; right:0; z-index:10001; background:#1a3a6b; padding:10px 20px; gap:10px; align-items:center; }
 @media print {
     @page { margin:0; size:A4; }
     html,body { margin:0!important; padding:0!important; background:white!important; }
     body > *:not(#print-area) { display:none!important; }
-    #print-area { display:block!important; }
+    #print-area { display:block!important; position:static!important; overflow:visible!important; padding:0!important; background:white!important; }
+    #print-area .gn-page { min-height:297mm!important; max-width:100%!important; box-shadow:none!important; }
+    #print-toolbar { display:none!important; }
     * { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
-    #print-area .gn-header,#print-area .gn-red,#print-area .gn-info-tag,
-    #print-area table.gn-table thead tr,#print-area table.gn-table th,
-    #print-area .gn-total-main,#print-area .gn-pay-row,#print-area .gn-footer {
-        -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important;
-    }
-    #print-area .gn-logo { display:block!important; }
-    #print-area table.gn-table tbody tr:nth-child(even) td { background:#f8faff!important; }
-    #print-area svg, #print-area .gn-bc svg { display:block!important; }
-    #print-area #print-qr-code canvas,#print-area #print-qr-code img { display:block!important; }
-    #print-area table.gn-table tr { page-break-inside:avoid; }
-    #print-area .gn-totals,#print-area .gn-pay-row,#print-area .gn-cond-row,#print-area .gn-footer { page-break-inside:avoid; }
 }
+
 </style>
 </head>
 <body>
@@ -718,7 +698,7 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
 <div class="app-shell hidden" id="app-shell"style="display:none">
     <header>
         <div class="header-left">
-            <h1>CRM 3D – V4.00</h1>
+            <h1>CRM3D Print – V5.00</h1>
             <div id="last-backup-indicator" class="last-backup-indicator">
                 Dernière sauvegarde : jamais
             </div>
@@ -767,7 +747,7 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
                             <div class="accueil-card-label">Projets</div>
                             <div id="dash-projects-count" class="accueil-card-value">0</div>
                         </div>
-
+                        
                         <div class="accueil-card">
                             <div class="accueil-card-label">Produits</div>
                             <div id="dash-products-count" class="accueil-card-value">0</div>
@@ -2643,10 +2623,14 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
 </div>
 
 <!-- ================== ZONE IMPRESSION DOCUMENTS A4 ================== -->
+
+<div id="print-toolbar">
+    <button onclick="window.print()" style="background:#22c55e;color:white;border:none;padding:8px 18px;border-radius:6px;font-weight:800;cursor:pointer;font-size:14px;">🖨️ Imprimer / PDF</button>
+    <button onclick="closePrintArea()" style="background:#ef4444;color:white;border:none;padding:8px 18px;border-radius:6px;font-weight:800;cursor:pointer;font-size:14px;">✕ Fermer</button>
+    <span style="color:rgba(255,255,255,0.6);font-size:12px;margin-left:10px;">Pour PDF : choisir "Enregistrer en PDF"</span>
+</div>
 <div id="print-area">
   <div class="gn-page">
-
-    <!-- HEADER -->
     <div class="gn-header">
       <div class="gn-logo-zone">
         <img id="print-logo" class="gn-logo" alt="">
@@ -2664,8 +2648,6 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
       </div>
     </div>
     <div class="gn-red"></div>
-
-    <!-- CLIENT / INFOS -->
     <div class="gn-info-row">
       <div class="gn-info-box">
         <div class="gn-info-tag">CLIENT</div>
@@ -2676,26 +2658,20 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
         <div id="print-info-block" class="gn-info-val"></div>
       </div>
     </div>
-
-    <!-- TABLEAU -->
     <table class="gn-table">
-      <thead>
-        <tr>
-          <th class="gn-photo-cell">Photo</th>
-          <th style="width:52px;">Réf.</th>
-          <th class="gn-left">Description</th>
-          <th style="width:36px;">Qté</th>
-          <th style="width:56px;">PU HT</th>
-          <th style="width:40px;">TVA %</th>
-          <th style="width:62px;">Total HT</th>
-          <th style="width:66px;">Total TTC</th>
-          <th class="gn-bc">Code-barres</th>
-        </tr>
-      </thead>
+      <thead><tr>
+        <th style="width:60px;">Photo</th>
+        <th style="width:50px;">Réf.</th>
+        <th class="gn-left">Description</th>
+        <th style="width:32px;">Qté</th>
+        <th style="width:52px;">PU HT</th>
+        <th style="width:36px;">TVA%</th>
+        <th style="width:58px;">Total HT</th>
+        <th style="width:62px;">Total TTC</th>
+        <th style="width:220px;">Code-barres</th>
+      </tr></thead>
       <tbody id="print-lines-body"></tbody>
     </table>
-
-    <!-- TOTAUX -->
     <div class="gn-totals">
       <div class="gn-totals-box">
         <div class="gn-total-line"><span>Total HT</span><span id="print-total-ht">0,00 €</span></div>
@@ -2703,8 +2679,6 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
         <div class="gn-total-main"><span>TOTAL TTC</span><span id="print-total-ttc">0,00 €</span></div>
       </div>
     </div>
-
-    <!-- QR PAIEMENT -->
     <div class="gn-pay-row">
       <div id="print-qr-code"></div>
       <div class="gn-pay-info">
@@ -2714,8 +2688,6 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
       </div>
       <div style="flex:1;text-align:right;font-size:10px;color:#6b7280;">Virement · CB · PayPal</div>
     </div>
-
-    <!-- CONDITIONS + SIGNATURE -->
     <div class="gn-cond-row">
       <div class="gn-cond-box">
         <h4>Conditions</h4>
@@ -2727,13 +2699,10 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
         <div class="gn-sign-box"></div>
       </div>
     </div>
-
-    <!-- FOOTER -->
     <div class="gn-footer">
       <div class="gn-footer-legal" id="print-legal-text"></div>
       <div class="gn-footer-brand" id="print-footer-brand"></div>
     </div>
-
   </div>
 </div>
 
@@ -2989,7 +2958,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initRawMaterialSection();
         initProjectsSection();
         initPrintersSection();
-            initDashboard();
+        initDashboard();
     });
 });
 
@@ -3575,7 +3544,6 @@ function initProductsSection() {
                 <td>${p.imageData?'<span>Oui</span>':''}</td>
                 <td><div class="table-actions-buttons">
                     <button class="btn-secondary btn-edit" type="button">Éditer</button>
-                    <button class="btn-secondary btn-avoir" type="button" style="background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.4);color:#a78bfa;">📋 Avoir</button>
                     <button class="btn-danger btn-del" type="button">Suppr.</button>
                 </div></td>`;
             tr.querySelector('.btn-edit').addEventListener('click', () => openProductForm(p));
@@ -4128,11 +4096,9 @@ function initBcSection() {
                 <td>${etatDelai}</td>
                 <td><div class="table-actions-buttons">
                     <button class="btn-secondary btn-edit" type="button">Éditer</button>
-                    <button class="btn-secondary btn-avoir" type="button" style="background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.4);color:#a78bfa;">📋 Avoir</button>
                     <button class="btn-danger btn-del" type="button">Suppr.</button>
                 </div></td>`;
             tr.querySelector('.btn-edit').addEventListener('click', ()=>openBcForm(bc));
-            tr.querySelector('.btn-avoir').addEventListener('click', ()=>genererAvoirBC(bc));
             tr.querySelector('.btn-del').addEventListener('click', () => {
                 if (!confirm('Supprimer ce bon de commande ?')) return;
                 data.bc = data.bc.filter(x=>x.id!==bc.id);
@@ -4336,17 +4302,15 @@ function initFactureSection() {
             tr.innerHTML = `
                 <td>${f.number||''}</td><td>${cli?cli.name:''}</td>
                 <td>${devis?devis.number||'':''}${bc?' / '+(bc.shortNumber||''):''}</td>
-                <td>${f.date||''}</td><td>${f.status==='avoir'?'<span style="color:#a78bfa;font-weight:700;">📋 Avoir</span>':f.status||''}</td>
+                <td>${f.date||''}</td><td>${f.status||''}</td>
                 <td>${f.totalTtc?formatCurrency(f.totalTtc):''}</td>
                 <td>${f.dueDate||''}</td>
                 <td>${f.relanceDelay!=null?f.relanceDelay+' j':''}</td>
                 <td><div class="table-actions-buttons">
                     <button class="btn-secondary btn-edit" type="button">Éditer</button>
-                    <button class="btn-secondary btn-avoir" type="button" style="background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.4);color:#a78bfa;">📋 Avoir</button>
                     <button class="btn-danger btn-del" type="button">Suppr.</button>
                 </div></td>`;
             tr.querySelector('.btn-edit').addEventListener('click',()=>openFactureForm(f));
-            tr.querySelector('.btn-avoir').addEventListener('click',()=>genererAvoir(f));
             tr.querySelector('.btn-del').addEventListener('click',()=>{
                 if (!confirm('Supprimer cette facture ?')) return;
                 data.factures=data.factures.filter(x=>x.id!==f.id);
@@ -4354,89 +4318,6 @@ function initFactureSection() {
             });
             tbody.appendChild(tr);
         });
-    }
-
-    function genererAvoirBC(bc) {
-        var devis  = bc.devisId ? data.devis.find(function(d){ return d.id===bc.devisId; }) : null;
-        var cli    = devis ? data.clients.find(function(c){ return c.id===devis.clientId; }) : null;
-        var totalRef = devis ? (devis.totalTtc||0) : 0;
-        var lignes   = devis ? (devis.lines||[]) : [];
-        var clientId = devis ? devis.clientId : '';
-
-        if (!devis) {
-            alert('Aucun devis associé à ce BC.\nGoûtez sur Facturation pour créer un avoir manuellement.');
-            return;
-        }
-
-        var ok = confirm(
-            'Créer un avoir pour le BC ' + (bc.shortNumber||'') +
-            '\nClient : ' + (cli?cli.name:'') +
-            '\nMontant TTC : ' + formatCurrency(totalRef) + ' €' +
-            '\n\nOK = Avoir TOTAL\nAnnuler = Montant partiel'
-        );
-        var mt = totalRef;
-        if (!ok) {
-            var sv = prompt('Montant de l\'avoir (TTC) :', totalRef);
-            if (sv === null) return;
-            mt = parseFloat(sv) || 0;
-            if (mt <= 0 || mt > totalRef) { alert('Montant invalide.'); return; }
-        }
-        var ratio = mt / (totalRef || 1);
-        var av = {
-            id:       uuid(),
-            number:   'AV-' + (bc.shortNumber||Date.now()).toString().replace(/[^0-9]/g,''),
-            date:     new Date().toISOString().slice(0,10),
-            status:   'avoir',
-            clientId: clientId,
-            devisId:  devis ? devis.id : '',
-            bcId:     bc.id,
-            dueDate:  new Date().toISOString().slice(0,10),
-            notes:    'Avoir sur BC ' + (bc.shortNumber||'') + (mt < totalRef ? ' (partiel : ' + formatCurrency(mt) + ' €)' : ' (total)'),
-            lines:    lignes.map(function(l){ return Object.assign({}, l, {qty: -(parseFloat(l.qty||1) * ratio)}); }),
-            totalHt:  -Math.abs((devis.totalHt||0)  * ratio),
-            totalTva: -Math.abs((devis.totalTva||0) * ratio),
-            totalTtc: -Math.abs(mt)
-        };
-        data.factures.push(av);
-        saveData(); renderFactures(); initDashboard();
-        if (confirm('✅ Avoir ' + av.number + ' créé dans Facturation !\nMontant : ' + formatCurrency(mt) + ' €\n\nImprimer maintenant ?')) {
-            openFactureForm(av);
-            setTimeout(function(){ document.getElementById('btn-print-facture').click(); }, 400);
-        }
-    }
-
-    function genererAvoir(fo) {
-        var cli = data.clients.find(function(c){ return c.id === fo.clientId; });
-        var ok = confirm('Créer un avoir pour la facture ' + (fo.number||'') + '\nClient : ' + (cli?cli.name:'') + '\nMontant TTC : ' + formatCurrency(fo.totalTtc||0) + ' €\n\nOK = Avoir TOTAL\nAnnuler = Montant partiel');
-        var mt = fo.totalTtc || 0;
-        if (!ok) {
-            var sv = prompt('Montant de l\'avoir (TTC) :', fo.totalTtc||0);
-            if (sv === null) return;
-            mt = parseFloat(sv) || 0;
-            if (mt <= 0 || mt > fo.totalTtc) { alert('Montant invalide.'); return; }
-        }
-        var ratio = mt / (fo.totalTtc || 1);
-        var av = {
-            id: uuid(),
-            number: 'AV-' + (fo.number||'').replace(/[^0-9]/g,''),
-            date: new Date().toISOString().slice(0,10),
-            status: 'avoir',
-            clientId: fo.clientId,
-            devisId: fo.devisId || '',
-            bcId: fo.bcId || '',
-            dueDate: new Date().toISOString().slice(0,10),
-            notes: 'Avoir sur facture ' + (fo.number||'') + (mt < fo.totalTtc ? ' (partiel : ' + formatCurrency(mt) + ' €)' : ' (total)'),
-            lines: (fo.lines||[]).map(function(l){ return Object.assign({}, l, {qty: -(parseFloat(l.qty||1) * ratio)}); }),
-            totalHt:  -Math.abs((fo.totalHt||0)  * ratio),
-            totalTva: -Math.abs((fo.totalTva||0) * ratio),
-            totalTtc: -Math.abs(mt)
-        };
-        data.factures.push(av);
-        saveData(); renderFactures(); initDashboard();
-        if (confirm('✅ Avoir ' + av.number + ' créé !\nMontant : ' + formatCurrency(mt) + ' €\n\nImprimer maintenant ?')) {
-            openFactureForm(av);
-            setTimeout(function(){ document.getElementById('btn-print-facture').click(); }, 400);
-        }
     }
 
     function addFactureLine(line) {
@@ -4843,9 +4724,12 @@ function initLabelsSection() {
         try {
             JsBarcode(svg, String(text||'SCAN'), {
                 format: 'CODE128',
-                displayValue: false,
-                height: 30,
-                margin: 2,
+                displayValue: true,
+                fontSize: 11,
+                textMargin: 3,
+                height: 50,
+                margin: 4,
+                width: 2,
                 background: '#ffffff',
                 lineColor: '#000000'
             });
@@ -4858,12 +4742,23 @@ function initLabelsSection() {
         const div = document.createElement('div');
         div.style.display='inline-block';
         try {
-            new QRCode(div, {
+            const tmp = document.createElement('div');
+            tmp.style.cssText='position:absolute;left:-9999px;';
+            document.body.appendChild(tmp);
+            new QRCode(tmp, {
                 text: String(text||'QR'),
-                width: 48, height: 48,
+                width: 80, height: 80,
                 colorDark: '#000000', colorLight: '#ffffff',
                 correctLevel: QRCode.CorrectLevel.M
             });
+            const canvas = tmp.querySelector('canvas');
+            if (canvas) {
+                const img = document.createElement('img');
+                img.src = canvas.toDataURL('image/png');
+                img.style.cssText = 'display:block;width:100%;height:auto;';
+                div.appendChild(img);
+            }
+            document.body.removeChild(tmp);
         } catch(e) { console.error('QR error:',e); div.textContent=text; }
         return div;
     }
@@ -5112,7 +5007,7 @@ body { font-family: system-ui,-apple-system,sans-serif; background:#fff; color:#
 .label-product-name { font-size:13px; font-weight:700; }
 .label-logo { height:22px; max-width:70px; object-fit:contain; }
 .label-body { flex:1; margin:2px 0; font-size:10px; color:#374151; line-height:1.4; }
-.label-footer { display:flex; justify-content:space-between; align-items:flex-end; gap:6px; margin-top:3px; border-top:1px solid #e5e7eb; padding-top:3px; }
+.label-footer { display:flex; flex-direction:column; align-items:stretch; gap:4px; margin-top:3px; border-top:1px solid #e5e7eb; padding-top:3px; }
 .label-price { font-size:14px; font-weight:800; color:#1d4ed8; }
 .label-codebar-wrapper { display:flex; align-items:center; justify-content:flex-end; }
 .label-codebar-wrapper img { display:block !important; max-width:120px; height:auto; }
@@ -5163,13 +5058,11 @@ function buildPrintHtml(type, payload) {
         logoImg.src = logoSource;
         logoImg.style.display = 'block';
         logoImg.onerror = () => { logoImg.style.display='none'; };
-        var logoSize = (data.settings && data.settings.logoSize) || 60;
+        var logoSize = (data.settings && data.settings.logoSize) || 80;
         logoImg.style.maxHeight = logoSize + 'px';
         logoImg.style.maxWidth  = Math.round(logoSize * 2.8) + 'px';
-    } else {
-        logoImg.style.display = 'none';
-        logoImg.removeAttribute('src');
-    }
+        logoImg.style.width = 'auto'; logoImg.style.height = 'auto';
+    } else { logoImg.style.display = 'none'; logoImg.removeAttribute('src'); }
 
     cName.textContent    = company.companyName || '';
     cAddr.textContent    = (company.address||'')+((company.zip||company.city)?'\n'+(company.zip||'')+' '+(company.city||''):'');
@@ -5220,8 +5113,8 @@ function buildPrintHtml(type, payload) {
         if(code){
             const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
             try{
-                JsBarcode(svg,String(code),{format:'CODE128',displayValue:false,height:28,margin:2,background:'#ffffff',lineColor:'#1f2937'});
-                svg.style.cssText='display:block;width:76px;height:30px;';
+                JsBarcode(svg,String(code),{format:'CODE128',displayValue:true,fontSize:11,textMargin:4,height:60,margin:3,background:'#ffffff',lineColor:'#1f2937'});
+                svg.style.cssText='display:block;width:216px;height:80px;';
                 tr.querySelector('.gn-bc').appendChild(svg);
             }catch(ex){ tr.querySelector('.gn-bc').textContent=code; }
         }
@@ -5235,14 +5128,20 @@ function buildPrintHtml(type, payload) {
         var base=(data.settings&&data.settings.website)||'https://pay.globizindustri.fr';
         var url=base+'/paiement/'+(num||'').replace(/[^a-zA-Z0-9-]/g,'-');
         if(lk) lk.textContent=url;
-        try{ new QRCode(el,{text:url,width:56,height:56,colorDark:'#1a3a6b',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M}); }
-        catch(e){ el.innerHTML='<div style="width:56px;height:56px;background:#f0f4ff;border:1px solid #bfdbfe;border-radius:4px;"></div>'; }
+        try{
+            var tmp=document.createElement('div');
+            tmp.style.cssText='position:absolute;left:-9999px;';
+            document.body.appendChild(tmp);
+            new QRCode(tmp,{text:url,width:56,height:56,colorDark:'#1a3a6b',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+            var canvas=tmp.querySelector('canvas');
+            if(canvas){ var img=document.createElement('img'); img.src=canvas.toDataURL('image/png'); img.style.cssText='width:56px;height:56px;display:block;'; el.appendChild(img); }
+            document.body.removeChild(tmp);
+        } catch(e){ el.innerHTML='<div style="width:56px;height:56px;background:#f0f4ff;border-radius:4px;"></div>'; }
     }
     function buildFooterBrand() {
         var el=document.getElementById('print-footer-brand');
         if(el) el.textContent=((data.settings&&data.settings.companyName)||'GLOBIZ INDUSTRI').toUpperCase();
     }
-
     if (type==='devis') {
         const d=payload;
         const client=data.clients.find(c=>c.id===d.clientId);
@@ -5303,7 +5202,30 @@ function buildPrintHtml(type, payload) {
     return document.querySelector('#print-area .print-page').innerHTML;
 }
 
+function showPrintArea() {
+    var pa=document.getElementById('print-area');
+    var tb=document.getElementById('print-toolbar');
+    if(pa) pa.style.display='block';
+    if(tb) tb.style.display='flex';
+    document.body.style.overflow='hidden';
+}
+window.closePrintArea = function() {
+    var pa=document.getElementById('print-area');
+    var tb=document.getElementById('print-toolbar');
+    if(pa) pa.style.display='none';
+    if(tb) tb.style.display='none';
+    document.body.style.overflow='';
+};
 function printDocument(type, payload, doPrint) {
+    try { buildPrintHtml(type, payload); } catch(e) { console.error(e); }
+    showPrintArea();
+    if (doPrint) { setTimeout(function(){ window.print(); }, 400); }
+}
+function openPrintPreview(type, payload) {
+    try { buildPrintHtml(type, payload); } catch(e) { console.error(e); }
+    showPrintArea();
+}
+function printDocument_UNUSED(type, payload, doPrint) {
     const printArea = document.getElementById('print-area');
     if (!printArea) return;
     buildPrintHtml(type, payload);
@@ -5317,32 +5239,7 @@ function printDocument(type, payload, doPrint) {
     }
 }
 
-function openPrintPreview(type, payload) {
-    const inner = buildPrintHtml(type, payload);
-    const w = window.open('','_blank');
-    if (!w) { alert('Pop-up bloqué. Autorise les pop-ups pour l\'aperçu.'); return; }
-    const styleTags = Array.from(document.querySelectorAll('style,link[rel="stylesheet"]'))
-        .map(el=>el.outerHTML).join('\n');
-    w.document.write(`<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Aperçu ${type}</title>
-${styleTags}
-<style>
-body { margin:0; padding:20px; background:#e5e7eb; overflow-x:hidden; }
-#print-area { display:block !important; }
-.print-page { background:#fff; border:1px solid #d1d5db; max-width:210mm; margin:0 auto; padding:15mm; box-sizing:border-box; font-size:11px; color:#111827; overflow:visible; }
-svg { display:block !important; }
-</style>
-</head>
-<body>
-<div id="print-area"><div class="print-page">${inner}</div></div>
-<scr"+"ipt>window.focus();<\/script>
-</body>
-</html>`);
-    w.document.close();
-}
+
 
 // ================== Matière / Fournisseur (section dédiée) ==================
 
@@ -5589,9 +5486,30 @@ function initProjectsSection() {
     const btnOpenDevis   =document.getElementById('btn-open-project-devis');
     const btnOpenBc      =document.getElementById('btn-open-project-bc');
     const btnOpenFacture =document.getElementById('btn-open-project-facture');
-    if (btnOpenDevis)   btnOpenDevis.addEventListener('click',()=>{ const id=document.getElementById('project-devis').value; if(id){ document.querySelector('[data-section="section-devis"]').click(); }});
-    if (btnOpenBc)      btnOpenBc.addEventListener('click',()=>{ const id=document.getElementById('project-bc').value; if(id){ document.querySelector('[data-section="section-bc"]').click(); }});
-    if (btnOpenFacture) btnOpenFacture.addEventListener('click',()=>{ const id=document.getElementById('project-facture').value; if(id){ document.querySelector('[data-section="section-factures"]').click(); }});
+    if (btnOpenDevis) btnOpenDevis.addEventListener('click', function() {
+        var id = document.getElementById('project-devis').value;
+        if (!id) { alert('Aucun devis lié à ce projet.'); return; }
+        var d = data.devis.find(function(x){ return x.id===id; });
+        if (!d) { alert('Devis introuvable.'); return; }
+        document.querySelector('[data-section="section-devis"]').click();
+        setTimeout(function(){ openDevisForm(d); }, 200);
+    });
+    if (btnOpenBc) btnOpenBc.addEventListener('click', function() {
+        var id = document.getElementById('project-bc').value;
+        if (!id) { alert('Aucun bon de commande lié à ce projet.'); return; }
+        var bc = data.bc.find(function(x){ return x.id===id; });
+        if (!bc) { alert('Bon de commande introuvable.'); return; }
+        document.querySelector('[data-section="section-bc"]').click();
+        setTimeout(function(){ openBcForm(bc); }, 200);
+    });
+    if (btnOpenFacture) btnOpenFacture.addEventListener('click', function() {
+        var id = document.getElementById('project-facture').value;
+        if (!id) { alert('Aucune facture liée à ce projet.'); return; }
+        var f = data.factures.find(function(x){ return x.id===id; });
+        if (!f) { alert('Facture introuvable.'); return; }
+        document.querySelector('[data-section="section-factures"]').click();
+        setTimeout(function(){ openFactureForm(f); }, 200);
+    });
 
     if (btnNew)    btnNew.addEventListener('click',()=>openProjectForm(null));
     if (btnCancel) btnCancel.addEventListener('click',()=>panel.classList.add('hidden'));
@@ -5669,7 +5587,6 @@ function initPrintersSection() {
                 <td>${jobsEnCours||0}</td>
                 <td><div class="table-actions-buttons">
                     <button class="btn-secondary btn-edit" type="button">Éditer</button>
-                    <button class="btn-secondary btn-avoir" type="button" style="background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.4);color:#a78bfa;">📋 Avoir</button>
                     <button class="btn-danger btn-del" type="button">Suppr.</button>
                 </div></td>`;
             tr.querySelector('.btn-edit').addEventListener('click',()=>openPrinterForm(p));
@@ -7076,7 +6993,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ================================================================
-// CRM 3D V4.00 — patch_imprimantes.js
+// CRM 3D V5.00 — patch_imprimantes.js
 // Refonte complète page Imprimantes :
 // - Cartes visuelles 5×20cm scrollable
 // - Statuts colorés animés
@@ -8944,15 +8861,19 @@ function fixQRImpression() {
         var css = '@page{margin:10mm;size:auto;}*{box-sizing:border-box;margin:0;padding:0;}'
             + 'body{font-family:Arial,sans-serif;background:#fff;padding:6mm;-webkit-print-color-adjust:exact;print-color-adjust:exact;}'
             + '.labels-grid{display:flex;flex-wrap:wrap;gap:4mm;}'
-            + '.label-card{background:#fff;border:1px solid #9ca3af;border-radius:4px;padding:5px 7px;font-size:11px;display:flex;flex-direction:column;justify-content:space-between;page-break-inside:avoid;width:240px;min-height:145px;}'
-            + '.label-header{display:flex;justify-content:space-between;align-items:flex-start;gap:4px;margin-bottom:3px;}'
-            + '.label-product-name{font-size:13px;font-weight:700;}'
-            + '.label-logo{height:22px;max-width:70px;object-fit:contain;}'
-            + '.label-body{flex:1;margin:2px 0;font-size:10px;color:#374151;line-height:1.4;}'
-            + '.label-footer{display:flex;justify-content:space-between;align-items:flex-end;gap:6px;margin-top:3px;border-top:1px solid #e5e7eb;padding-top:3px;}'
-            + '.label-price{font-size:14px;font-weight:800;color:#1d4ed8;}'
-            + '.label-codebar-wrapper{display:flex;align-items:center;justify-content:flex-end;}'
+            + '.label-card{background:#fff;border:1px solid #9ca3af;border-radius:4px;padding:8px 10px;font-size:14px;display:flex;flex-direction:column;justify-content:space-between;page-break-inside:avoid;width:190mm;min-height:80mm;}'
+            + '.label-header{display:flex;justify-content:space-between;align-items:flex-start;gap:4px;margin-bottom:4px;}'
+            + '.label-product-name{font-size:11px;font-weight:700;}'
+            + '.label-logo{height:30px;max-width:90px;object-fit:contain;}'
+            + '.label-body{flex:1;margin:2px 0;font-size:9px;color:#374151;line-height:1.4;}'
+            + '.label-footer{display:flex;flex-direction:column;align-items:stretch;gap:4px;margin-top:4px;border-top:1px solid #e5e7eb;padding-top:4px;}'
+            + '.label-price{font-size:13px;font-weight:800;color:#1d4ed8;}'
+            + '.label-codebar-wrapper{display:flex;align-items:center;justify-content:center;width:100%;margin-top:4mm;}'
+            + '.label-codebar-wrapper svg,.label-codebar-wrapper img{width:100% !important;max-width:100% !important;height:35mm !important;display:block !important;}'
             + 'img{display:block !important;-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;}'
+            + '.label-codebar-wrapper{width:100% !important;justify-content:center !important;}'
+            + '.label-codebar-wrapper img,.label-codebar-wrapper svg{width:100% !important;min-height:50px !important;height:auto !important;display:block !important;}'
+            + '.label-codebar-wrapper canvas{width:60% !important;height:auto !important;display:block !important;margin:0 auto !important;}'
             + '.size-avery-3x8{width:250px;min-height:125px;}'
             + '.size-avery-l7160{width:240px;min-height:144px;}'
             + '.size-avery-l7163{width:375px;min-height:144px;}'
@@ -9169,6 +9090,7 @@ window.testConnexionBambu = function() {
     var retryTimer = null;
 
     function connectBridge() {
+        if(location.protocol==='https:'){updateBridgeUI(false);return;}
         try {
             ws = new WebSocket('ws://localhost:3001');
             ws.onopen = function() {
@@ -9264,7 +9186,7 @@ window.testConnexionBambu = function() {
 <footer class="app-footer">
     <div class="app-footer-left">
         <span id="footer-company-name">Nom de l'entreprise</span>
-        <span> – CRM 3D – V4.00</span>
+        <span> – CRM3D Print – V5.00</span>
     </div>
     <div class="app-footer-center">
         <span id="footer-legal-short">© <span id="footer-year"></span> – Tous droits réservés</span>
