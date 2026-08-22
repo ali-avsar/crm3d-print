@@ -2318,6 +2318,30 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
                     <button id="btn-save-settings" type="button" class="btn-primary">Enregistrer</button>
                 </form>
             </div>
+
+            <div class="panel glass-panel" id="panel-backup-recovery" style="margin-top:16px;">
+                <div class="panel-header">
+                    <h3>Sauvegarde &amp; récupération des données</h3>
+                    <small>Les données du CRM sont stockées dans le navigateur (localStorage) de CE poste et de CE domaine. Pense à exporter régulièrement.</small>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Sauvegarde complète</label>
+                        <button id="btn-export-data" type="button" class="btn-primary">Exporter les données (JSON)</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Restaurer depuis un fichier JSON</label>
+                        <input id="input-import-data" type="file" accept="application/json,.json">
+                        <button id="btn-import-data" type="button" class="btn-secondary" style="margin-top:6px;">Importer ce fichier</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Données retrouvables dans ce navigateur</label>
+                        <button id="btn-scan-recovery" type="button" class="btn-secondary">Rechercher les sauvegardes locales</button>
+                    </div>
+                </div>
+                <div id="recovery-results" class="table-wrapper" style="margin-top:10px;"></div>
+                <div id="recovery-diag" style="margin-top:10px;font-size:12px;opacity:.8;white-space:pre-wrap;"></div>
+            </div>
         </section>
 
         <!-- ================== MATIÈRE / FOURNISSEUR ================== -->
@@ -2715,6 +2739,15 @@ tbody tr:nth-child(odd) { background: rgba(15,23,42,0.95); }
 
 const STORAGE_KEY = 'crm3d_v31';
 
+// ---- Sauvegardes locales : préfixes de clés ----
+const BACKUP_PREFIX     = 'crm3d_auto_';       // instantanés automatiques
+const QUARANTINE_PREFIX = 'crm3d_corrompu_';   // sauvegardes illisibles mises de côté
+const MAX_BACKUPS       = 3;
+
+// État du dernier chargement, consultable dans la console via crm3dDiag()
+const dataLoadReport = { key: null, recoveredFrom: null, corrupted: false, corruptedKey: null, empty: false };
+let lastAutoBackup = 0;
+
 const defaultData = {
     settings: {
         companyName: '',
@@ -2830,32 +2863,157 @@ function migrateDataIfNeeded(parsed) {
     return merged;
 }
 
+// Nombre total d'enregistrements « métier » d'un jeu de données
+function countEntries(o) {
+    if (!o || typeof o !== 'object') return -1;
+    return ['products','clients','materials','devis','bc','factures','stock','projects','printers','jobs']
+        .reduce((n, k) => n + (Array.isArray(o[k]) ? o[k].length : 0), 0);
+}
+function hasContent(o) { return countEntries(o) > 0; }
+
+// Toutes les sauvegardes CRM présentes dans ce navigateur (clé courante, anciennes versions, instantanés auto)
+function listLocalSnapshots() {
+    const out = [];
+    let keys = [];
+    try { for (let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i)); } catch (e) { return out; }
+    keys.filter(k => k && k.indexOf('crm3d_') === 0).forEach(k => {
+        let raw = null;
+        try { raw = localStorage.getItem(k); } catch (e) { return; }
+        if (!raw) return;
+        const snap = { key: k, raw: raw, size: raw.length, parsed: null, count: -1, corrupted: false };
+        try {
+            snap.parsed = JSON.parse(raw);
+            snap.count  = countEntries(snap.parsed);
+            if (snap.count < 0) { snap.parsed = null; snap.corrupted = true; }
+        } catch (e) { snap.corrupted = true; }
+        out.push(snap);
+    });
+    return out.sort((a, b) => b.count - a.count);
+}
+
+// Met de côté une sauvegarde illisible au lieu de l'effacer
+function quarantineRaw(raw) {
+    const key = QUARANTINE_PREFIX + Date.now();
+    try { localStorage.setItem(key, raw); dataLoadReport.corruptedKey = key; } catch (e) {}
+    return key;
+}
+
 function loadData() {
-    try {
-        let raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) {
-            const old26 = localStorage.getItem('crm3d_v26');
-            const old25 = localStorage.getItem('crm3d_v25');
-            const old30 = localStorage.getItem('crm3d_v30');
-            raw = old30 || old26 || old25 || null;
-        }
-        if (!raw) return structuredClone(defaultData);
-        const parsed = JSON.parse(raw);
-        return migrateDataIfNeeded(parsed);
-    } catch (e) {
-        console.error('Erreur chargement data, reset:', e);
+    let raw = null;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) {
+        console.error('localStorage inaccessible (navigation privée ou cookies bloqués) :', e);
         return structuredClone(defaultData);
     }
+
+    let parsed = null;
+    if (raw) {
+        try {
+            parsed = JSON.parse(raw);
+            dataLoadReport.key = STORAGE_KEY;
+        } catch (e) {
+            // Ancien comportement : reset silencieux → les données étaient écrasées au 1er enregistrement.
+            dataLoadReport.corrupted = true;
+            const qk = quarantineRaw(raw);
+            console.error('Sauvegarde « ' + STORAGE_KEY + ' » illisible, mise de côté dans « ' + qk + ' » :', e);
+            parsed = null;
+        }
+    }
+
+    // Rien d'exploitable ici : on va chercher la sauvegarde locale la plus fournie
+    if (!hasContent(parsed)) {
+        const best = listLocalSnapshots()
+            .filter(sn => sn.key !== STORAGE_KEY && sn.parsed && sn.count > 0)
+            .sort((a, b) => b.count - a.count)[0];
+        if (best) {
+            console.warn('Aucune donnée sous « ' + STORAGE_KEY + ' » : récupération depuis « ' + best.key + ' » (' + best.count + ' enregistrements).');
+            parsed = best.parsed;
+            dataLoadReport.recoveredFrom = best.key;
+        }
+    }
+
+    if (!parsed) {
+        dataLoadReport.empty = true;
+        return structuredClone(defaultData);
+    }
+    return migrateDataIfNeeded(parsed);
+}
+
+// Instantané automatique (au plus 1 toutes les 10 min, MAX_BACKUPS conservés)
+function rotateBackup(payload) {
+    if (!payload || payload.length > 2000000) return;   // trop volumineux : on ne double pas le stockage
+    const now = Date.now();
+    if (now - lastAutoBackup < 10 * 60 * 1000) return;
+    lastAutoBackup = now;
+    const backups = listLocalSnapshots().filter(sn => sn.key.indexOf(BACKUP_PREFIX) === 0)
+        .map(sn => sn.key).sort();
+    while (backups.length >= MAX_BACKUPS) {
+        try { localStorage.removeItem(backups.shift()); } catch (e) {}
+    }
+    try { localStorage.setItem(BACKUP_PREFIX + now, payload); } catch (e) {}
+}
+
+function purgeOldestBackup() {
+    const backups = listLocalSnapshots().filter(sn => sn.key.indexOf(BACKUP_PREFIX) === 0)
+        .map(sn => sn.key).sort();
+    if (!backups.length) return false;
+    try { localStorage.removeItem(backups[0]); return true; } catch (e) { return false; }
 }
 
 function saveData() {
+    let payload;
+    try { payload = JSON.stringify(data); }
+    catch (e) { console.error('Sérialisation impossible :', e); return; }
+
+    // Garde-fou : ne jamais remplacer une sauvegarde remplie par un jeu vide sans validation
+    if (!hasContent(data)) {
+        let prevCount = -1;
+        try { prevCount = countEntries(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null')); } catch (e) {}
+        if (prevCount > 0) {
+            console.warn('Enregistrement d\'un jeu de données vide alors que ' + prevCount + ' enregistrements sont stockés.');
+            if (!confirm('Attention : tu es sur le point d\'enregistrer un CRM VIDE alors que ' + prevCount +
+                         ' enregistrements (produits, clients, devis...) sont encore stockés dans ce navigateur.\n\n' +
+                         'Annule si tes produits ont disparu : va dans Paramètres > Sauvegarde & récupération.\n\n' +
+                         'Enregistrer quand même ?')) return;
+        }
+    }
+
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        localStorage.setItem(STORAGE_KEY, payload);
+        rotateBackup(payload);
     } catch (e) {
         console.error('Erreur sauvegarde localStorage:', e);
-        alert('Impossible d\'enregistrer les données (quota localStorage atteint ou bloqué). Pense à exporter en JSON régulièrement.');
+        // Quota atteint : on libère les instantanés automatiques puis on retente une fois
+        let retried = false;
+        while (purgeOldestBackup()) {
+            try { localStorage.setItem(STORAGE_KEY, payload); retried = true; break; } catch (e2) {}
+        }
+        if (!retried) {
+            alert('Impossible d\'enregistrer les données : le stockage du navigateur est plein ou bloqué.\n' +
+                  'Taille des données : ' + Math.round(payload.length / 1024) + ' Ko (les images de produits sont les plus lourdes).\n\n' +
+                  'Exporte tout de suite en JSON (Paramètres > Sauvegarde & récupération) avant de fermer l\'onglet.');
+        }
     }
 }
+
+// Diagnostic console : crm3dDiag()
+function crm3dDiag() {
+    const lines = [];
+    lines.push('Origine        : ' + location.origin + location.pathname);
+    lines.push('Clé courante   : ' + STORAGE_KEY);
+    lines.push('Chargé depuis  : ' + (dataLoadReport.recoveredFrom || dataLoadReport.key || 'aucune sauvegarde'));
+    if (dataLoadReport.corrupted) lines.push('!! Sauvegarde illisible mise de côté dans : ' + dataLoadReport.corruptedKey);
+    try { lines.push('Produits en mémoire : ' + data.products.length + ' | clients : ' + data.clients.length); } catch (e) {}
+    lines.push('Sauvegardes locales trouvées :');
+    listLocalSnapshots().forEach(sn => {
+        lines.push('  - ' + sn.key + ' : ' + (sn.corrupted ? 'ILLISIBLE' :
+            (sn.count + ' enregistrements, dont ' + ((sn.parsed.products || []).length) + ' produits')) +
+            ' (' + Math.round(sn.size / 1024) + ' Ko)');
+    });
+    const txt = lines.join('\n');
+    console.log(txt);
+    return txt;
+}
+window.crm3dDiag = crm3dDiag;
 
 // ================== Utilitaires ==================
 
@@ -3198,6 +3356,80 @@ function initAccountingSection() {
     const dashExport = document.getElementById('dash-btn-export');
     if (dashExport && btnExport) {
         dashExport.addEventListener('click', () => btnExport.click());
+    }
+
+    // ── Récupération : lister les sauvegardes présentes dans ce navigateur ──
+    const btnScan       = document.getElementById('btn-scan-recovery');
+    const recoveryBox   = document.getElementById('recovery-results');
+    const recoveryDiag  = document.getElementById('recovery-diag');
+
+    function restoreSnapshot(snap) {
+        if (!snap.parsed) { alert('Cette sauvegarde est illisible, elle ne peut pas être restaurée.'); return; }
+        if (!confirm('Restaurer « ' + snap.key +' » ?\n' +
+                     (snap.parsed.products || []).length + ' produits, ' +
+                     (snap.parsed.clients  || []).length + ' clients.\n\n' +
+                     'Les données actuellement affichées seront remplacées.')) return;
+        data = migrateDataIfNeeded(snap.parsed);
+        saveData();
+        alert('Restauration effectuée. La page va se recharger.');
+        location.reload();
+    }
+
+    function renderRecovery() {
+        if (!recoveryBox) return;
+        const snaps = listLocalSnapshots();
+        if (recoveryDiag) recoveryDiag.textContent = crm3dDiag();
+        if (!snaps.length) {
+            recoveryBox.innerHTML = '<p>Aucune sauvegarde CRM trouvée dans ce navigateur. ' +
+                'Si tes données étaient sur un autre navigateur, un autre poste ou une autre adresse du site ' +
+                '(www / sans www, http / https, sous-domaine), elles s\'y trouvent toujours : ' +
+                'ouvre le CRM depuis cette adresse-là et exporte le JSON.</p>';
+            return;
+        }
+        const rows = snaps.map((sn, i) => {
+            const d = sn.key.indexOf(BACKUP_PREFIX) === 0
+                ? new Date(parseInt(sn.key.slice(BACKUP_PREFIX.length), 10)).toLocaleString('fr-FR')
+                : (sn.key === STORAGE_KEY ? 'sauvegarde active' : 'ancienne version');
+            return '<tr><td>' + sn.key + '</td><td>' + d + '</td>' +
+                   '<td>' + (sn.corrupted ? 'ILLISIBLE' : (sn.parsed.products || []).length) + '</td>' +
+                   '<td>' + (sn.corrupted ? '-' : (sn.parsed.clients || []).length) + '</td>' +
+                   '<td>' + (sn.corrupted ? '-' : sn.count) + '</td>' +
+                   '<td>' + Math.round(sn.size / 1024) + ' Ko</td>' +
+                   '<td><div class="table-actions-buttons">' +
+                   '<button class="btn-secondary btn-restore-snap" data-i="' + i + '" type="button"' +
+                   (sn.corrupted ? ' disabled' : '') + '>Restaurer</button>' +
+                   '<button class="btn-secondary btn-dl-snap" data-i="' + i + '" type="button">Télécharger</button>' +
+                   '</div></td></tr>';
+        }).join('');
+        recoveryBox.innerHTML =
+            '<table><thead><tr><th>Clé</th><th>Date / origine</th><th>Produits</th><th>Clients</th>' +
+            '<th>Total</th><th>Taille</th><th>Actions</th></tr></thead><tbody>' + rows + '</tbody></table>';
+        recoveryBox.querySelectorAll('.btn-restore-snap').forEach(b => {
+            b.addEventListener('click', () => restoreSnapshot(snaps[parseInt(b.dataset.i, 10)]));
+        });
+        recoveryBox.querySelectorAll('.btn-dl-snap').forEach(b => {
+            b.addEventListener('click', () => {
+                const sn   = snaps[parseInt(b.dataset.i, 10)];
+                const blob = new Blob([sn.raw], { type: 'application/json' });
+                const url  = URL.createObjectURL(blob);
+                const a    = document.createElement('a');
+                a.href = url; a.download = sn.key + '.json';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        });
+    }
+
+    if (btnScan) btnScan.addEventListener('click', renderRecovery);
+
+    // Alerte immédiate si le chargement a détecté une perte ou une sauvegarde illisible
+    if (dataLoadReport.corrupted) {
+        console.warn('CRM3D : la sauvegarde principale était illisible. Paramètres > Sauvegarde & récupération.');
+        setTimeout(() => alert('La sauvegarde principale de ce navigateur était illisible ; elle a été mise de côté ' +
+            '(clé « ' + dataLoadReport.corruptedKey + ' ») au lieu d\'être effacée.\n\n' +
+            'Va dans Paramètres > Sauvegarde & récupération pour tenter une restauration.'), 800);
+    } else if (dataLoadReport.recoveredFrom) {
+        console.warn('CRM3D : données récupérées depuis « ' + dataLoadReport.recoveredFrom + ' ».');
     }
 
     if (btnImport && inputImport) {
